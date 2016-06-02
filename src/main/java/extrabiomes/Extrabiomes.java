@@ -41,12 +41,13 @@ import extrabiomes.handlers.RecipeHandler;
 import extrabiomes.helpers.LogHelper;
 import extrabiomes.lib.GeneralSettings;
 import extrabiomes.lib.Reference;
+import extrabiomes.module.amica.forestry.ForestryPlugin;
 import extrabiomes.module.amica.treecapitator.TreecapitatorPlugin;
 import extrabiomes.module.fabrica.recipe.RecipeManager;
-import extrabiomes.plugins.ForestryPlugin;
 import extrabiomes.plugins.PluginThaumcraft4;
 import extrabiomes.proxy.CommonProxy;
 import extrabiomes.utility.CreativeTab;
+import extrabiomes.utility.EnhancedConfiguration;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, dependencies = "")
 public class Extrabiomes {
@@ -86,10 +87,6 @@ public class Extrabiomes {
       }
     }
 
-    if (ForestryPlugin.isEnabled()) {
-      ForestryPlugin.postInit();
-    }
-
     LogHelper.info("Successfully Loaded.");
   }
 
@@ -117,7 +114,7 @@ public class Extrabiomes {
       LogHelper.info("Upgrading Configfile");
     }
 
-    ConfigurationHandler.init(new File(event.getModConfigurationDirectory(), "/extrabiomes.cfg"), false);
+    final EnhancedConfiguration config = ConfigurationHandler.init(new File(event.getModConfigurationDirectory(), "/extrabiomes.cfg"), false);
 
     BiomeHandler.init();
 
@@ -131,7 +128,7 @@ public class Extrabiomes {
     ItemHandler.createItems();
     CropHandler.createCrops();
 
-    BiomeHandler.registerWorldGenerators();
+    BiomeHandler.registerWorldGenerators(config);
     BiomeHandler.enableBiomes();
     BiomeManagerImpl.buildWeightedFloraLists();
 
@@ -139,6 +136,8 @@ public class Extrabiomes {
     Module.postEvent(new ModulePreInitEvent());
     Module.postEvent(new ModuleInitEvent());
 
+    // just in case anything else updated config settings
+    config.save();
   }
 
   @Mod.EventHandler
